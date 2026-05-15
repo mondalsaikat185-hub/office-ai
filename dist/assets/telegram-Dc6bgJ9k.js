@@ -1,0 +1,1 @@
+async function a(r,o,t){if(!(!r||!o||!t))try{const e=`https://api.telegram.org/bot${r}/sendMessage`;await fetch(e,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:o,text:t,parse_mode:"Markdown"})})}catch(e){console.error("Telegram error:",e)}}export{a as sendTelegramNotification};
