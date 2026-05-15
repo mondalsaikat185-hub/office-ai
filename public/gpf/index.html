@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPF Withdrawal Processing System</title>
+<meta name="description" content="GPF Withdrawal Note Sheet and Form 4A Order Generator for Government of India offices">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0f1219; --bg-secondary: #161b26; --bg-card: #1c2333;
+  --bg-input: #232b3e; --bg-hover: #283044;
+  --blue: #3b82f6; --blue-dim: #2563eb; --gold: #c8a961; --gold-dim: #a88b3d;
+  --green: #22c55e; --red: #ef4444; --orange: #f59e0b;
+  --text: #e2e8f0; --text-dim: #94a3b8; --text-muted: #64748b;
+  --border: #2d3748; --border-focus: #3b82f6;
+  --radius: 10px; --transition: 0.25s ease;
+  --header-bg: linear-gradient(135deg, #1a2744, #0f1b30);
+  --header-text: var(--text);
+  --calc-bg: linear-gradient(135deg, #1a2744, #0f1b30);
+}
+[data-theme="light"] {
+  --bg-primary: #f8fafc; --bg-secondary: #ffffff; --bg-card: #ffffff;
+  --bg-input: #f1f5f9; --bg-hover: #e2e8f0;
+  --blue: #2563eb; --blue-dim: #1d4ed8; --gold: #b48a3e; --gold-dim: #926d2e;
+  --green: #16a34a; --red: #dc2626; --orange: #ea580c;
+  --text: #0f172a; --text-dim: #475569; --text-muted: #64748b;
+  --border: #e2e8f0; --border-focus: #2563eb;
+  --header-bg: linear-gradient(135deg, #ffffff, #f1f5f9);
+  --header-text: #0f172a;
+  --calc-bg: #f8fafc;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:var(--bg-primary); color:var(--text); min-height:100vh; }
+/* Header */
+.header { background:var(--header-bg); border-bottom:1px solid var(--border); padding:16px 32px; display:flex; align-items:center; gap:16px; color:var(--header-text); }
+.header .logo { width:44px; height:44px; background:linear-gradient(135deg,var(--gold),var(--gold-dim)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; color:#1a1a2e; }
+.header h1 { font-size:20px; font-weight:600; background:linear-gradient(135deg,var(--gold),#e8d5a0); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.header .subtitle { font-size:12px; color:var(--text-dim); }
+/* Tabs */
+.tabs { display:flex; background:var(--bg-secondary); border-bottom:1px solid var(--border); padding:0 24px; gap:4px; }
+.tab-btn { padding:14px 22px; background:none; border:none; color:var(--text-dim); font:inherit; font-size:14px; font-weight:500; cursor:pointer; border-bottom:2px solid transparent; transition:var(--transition); display:flex; align-items:center; gap:8px; }
+.tab-btn:hover { color:var(--text); background:var(--bg-hover); }
+.tab-btn.active { color:var(--gold); border-bottom-color:var(--gold); }
+/* Tab Content */
+.tab-content { display:none; padding:24px 32px; max-width:1400px; margin:0 auto; animation:fadeIn .3s; }
+.tab-content.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+/* Cards */
+.card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:20px; }
+.card-title { font-size:16px; font-weight:600; color:var(--gold); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+/* Forms */
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.form-grid.cols-3 { grid-template-columns:1fr 1fr 1fr; }
+.form-group { display:flex; flex-direction:column; gap:5px; }
+.form-group.full { grid-column:1/-1; }
+.form-group label { font-size:12px; font-weight:500; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; }
+.form-group input, .form-group select, .form-group textarea {
+  background:var(--bg-input); border:1px solid var(--border); border-radius:7px; padding:10px 14px;
+  color:var(--text); font:inherit; font-size:14px; transition:var(--transition); outline:none;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--border-focus); box-shadow:0 0 0 3px rgba(59,130,246,.15); }
+.form-group textarea { resize:vertical; min-height:80px; }
+/* Buttons */
+.btn { padding:10px 20px; border:none; border-radius:7px; font:inherit; font-size:14px; font-weight:500; cursor:pointer; transition:var(--transition); display:inline-flex; align-items:center; gap:8px; }
+.btn-primary { background:linear-gradient(135deg,var(--blue),var(--blue-dim)); color:white; }
+.btn-primary:hover { filter:brightness(1.15); transform:translateY(-1px); }
+.btn-gold { background:linear-gradient(135deg,var(--gold),var(--gold-dim)); color:#1a1a2e; }
+.btn-gold:hover { filter:brightness(1.15); }
+.btn-success { background:linear-gradient(135deg,var(--green),#16a34a); color:white; }
+.btn-danger { background:var(--red); color:white; }
+.btn-danger:hover { filter:brightness(1.15); }
+.btn-outline { background:none; border:1px solid var(--border); color:var(--text-dim); }
+.btn-outline:hover { border-color:var(--blue); color:var(--blue); }
+.btn-sm { padding:6px 14px; font-size:13px; }
+.btn-group { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+/* Signatory List */
+.sig-list { display:flex; flex-direction:column; gap:10px; }
+.sig-card { display:flex; align-items:center; gap:14px; padding:14px; background:var(--bg-input); border:1px solid var(--border); border-radius:8px; transition:var(--transition); }
+.sig-card.active-sig { border-color:var(--gold); background:rgba(200,169,97,.08); }
+.sig-card input[type=radio] { accent-color:var(--gold); width:18px; height:18px; }
+.sig-info { flex:1; }
+.sig-info .name { font-weight:600; font-size:14px; }
+.sig-info .desg { font-size:12px; color:var(--text-dim); }
+.sig-actions { display:flex; gap:6px; }
+/* Split Layout (Case Tab) */
+.split { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+/* Preview */
+.preview-box { background:var(--bg-input); border:1px solid var(--border); border-radius:8px; padding:24px; font-family:'Times New Roman',serif; font-size:13px; line-height:1.7; color:var(--text); max-height:75vh; overflow-y:auto; white-space:pre-wrap; }
+.preview-tabs { display:flex; gap:4px; margin-bottom:12px; }
+.prev-tab-btn { padding:8px 16px; background:var(--bg-input); border:1px solid var(--border); border-radius:6px 6px 0 0; color:var(--text-dim); font:inherit; font-size:13px; cursor:pointer; border-bottom:none; }
+.prev-tab-btn.active { background:var(--bg-card); color:var(--gold); }
+/* Calc Panel */
+.calc-panel { background:var(--calc-bg); border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:16px; }
+.calc-row { display:flex; justify-content:space-between; padding:6px 0; font-size:13px; border-bottom:1px solid rgba(128,128,128,.1); }
+.calc-row:last-child { border:none; }
+.calc-label { color:var(--text-dim); }
+.calc-value { font-weight:600; color:var(--gold); }
+.calc-value.eligible { color:var(--green); }
+.calc-value.not-eligible { color:var(--red); }
+/* RAG Section */
+.upload-zone { border:2px dashed var(--border); border-radius:var(--radius); padding:40px; text-align:center; cursor:pointer; transition:var(--transition); }
+.upload-zone:hover { border-color:var(--blue); background:rgba(59,130,246,.05); }
+.upload-zone .icon { font-size:40px; margin-bottom:12px; }
+.progress-bar { height:6px; background:var(--bg-input); border-radius:3px; overflow:hidden; margin-top:12px; }
+.progress-bar .fill { height:100%; background:linear-gradient(90deg,var(--blue),var(--gold)); transition:width .3s; border-radius:3px; }
+.status-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:20px; font-size:12px; font-weight:500; }
+.status-badge.ready { background:rgba(34,197,94,.12); color:var(--green); }
+.status-badge.empty { background:rgba(239,68,68,.12); color:var(--red); }
+/* Modal */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:100; align-items:center; justify-content:center; }
+.modal-overlay.show { display:flex; }
+.modal { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:28px; width:90%; max-width:500px; animation:fadeIn .2s; }
+.modal h3 { font-size:18px; color:var(--gold); margin-bottom:20px; }
+
+/* AI Analysis Content Styling */
+.ai-analysis-content { display: flex; flex-direction: column; gap: 16px; }
+.ai-section { display: flex; flex-direction: column; gap: 6px; }
+.ai-section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.ai-section-value { font-size: 14px; color: var(--text); line-height: 1.5; }
+.ai-section-value strong { color: var(--gold); }
+.ai-status-box { padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+.ai-status-eligible { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); color: var(--green); }
+.ai-status-ineligible { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--red); }
+.ai-conflict-warning { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); color: var(--orange); padding: 12px; border-radius: 8px; font-size: 13px; }
+
+/* Toast */
+.toast { position:fixed; bottom:24px; right:24px; padding:14px 24px; border-radius:8px; font-size:14px; z-index:200; animation:slideUp .3s; }
+.toast.success { background:var(--green); color:white; }
+.toast.error { background:var(--red); color:white; }
+@keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+/* Responsive */
+@media(max-width:900px) {
+  .split { grid-template-columns:1fr; }
+  .form-grid { grid-template-columns:1fr; }
+  .tabs { overflow-x:auto; }
+  .header { padding:12px 16px; }
+  .tab-content { padding:16px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">₹</div>
+  <div>
+    <h1>GPF Withdrawal Processing System</h1>
+    <div class="subtitle">General Provident Fund (Central Services) Rules, 1960</div>
+  </div>
+  <div style="margin-left: auto; display: flex; gap: 10px;">
+    <button class="btn btn-outline btn-sm" id="theme-toggle" onclick="toggleTheme()" style="color: var(--gold); border-color: var(--gold);">☀️ Light Mode</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="settings">⚙️ Settings</button>
+  <button class="tab-btn" data-tab="rag">📚 GPF Manual (RAG)</button>
+  <button class="tab-btn" data-tab="case">📝 New Case</button>
+</nav>
+
+<!-- ===== SETTINGS TAB ===== -->
+<div class="tab-content active" id="tab-settings">
+  <div class="card">
+    <div class="card-title">🏛️ Office Details</div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Header Blank Space (lines) for pasting MS Word Logo</label>
+        <input id="s-header-space" type="number" value="6" title="Number of blank lines to leave at the top of the Order for pasting your DOCX logo">
+      </div>
+      <div class="form-group full">
+        <label>Office Short Name</label>
+        <input id="s-office-short" value="Customs(Prev.) Commissionerate, Bhubaneswar">
+      </div>
+      <div class="form-group full">
+        <label>HOD / Competent Authority Title</label>
+        <input id="s-hod" value="Commissioner, Customs(Prev.), Bhubaneswar">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📮 PAO Details</div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>PAO Name & Address</label>
+        <textarea id="s-pao" rows="3">The Pay & Accounts Officer
+CGST, Central Excise & Customs
+Bhubaneswar.</textarea>
+      </div>
+      <div class="form-group full">
+        <label>PAO Copy Line (for Copy forwarded to)</label>
+        <input id="s-pao-copy" value="PAO, CGST, CX & CUSTOMS Commissionerate, Bhubaneswar, Bhubaneswar Zone.">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🖼️ Dynamic Letterhead Settings</div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:14px;">আপনার লেটারহেডের বিবরণ এখানে সেট করুন। এটি Order জেনারেট করার সময় স্বয়ংক্রিয়ভাবে লেটারহেড তৈরি করতে ব্যবহৃত হবে।</p>
+    
+    <div class="form-grid" style="margin-bottom: 14px;">
+      <div class="form-group full">
+        <label>Generate Letterhead automatically in DOCX?</label>
+        <select id="s-use-letterhead">
+          <option value="yes">Yes (Generate automatically)</option>
+          <option value="no">No (Leave blank space for pre-printed letterhead)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-grid" id="letterhead-fields">
+      <div class="form-group"><label>Logo 1 (Left)</label><input type="file" id="s-logo1-file" accept="image/*" onchange="handleLogoUpload('s-logo1')"><img id="img-s-logo1" style="max-height: 50px; margin-top: 5px; display: none;"><button id="btn-s-logo1" class="btn btn-outline btn-sm" style="display:none;margin-top:5px;" onclick="clearLogo('s-logo1')">Clear Logo 1</button></div>
+      <div class="form-group"><label>Logo 2 (Center - Optional)</label><input type="file" id="s-logo2-file" accept="image/*" onchange="handleLogoUpload('s-logo2')"><img id="img-s-logo2" style="max-height: 50px; margin-top: 5px; display: none;"><button id="btn-s-logo2" class="btn btn-outline btn-sm" style="display:none;margin-top:5px;" onclick="clearLogo('s-logo2')">Clear Logo 2</button></div>
+      <div class="form-group"><label>Logo 3 (Right - Optional)</label><input type="file" id="s-logo3-file" accept="image/*" onchange="handleLogoUpload('s-logo3')"><img id="img-s-logo3" style="max-height: 50px; margin-top: 5px; display: none;"><button id="btn-s-logo3" class="btn btn-outline btn-sm" style="display:none;margin-top:5px;" onclick="clearLogo('s-logo3')">Clear Logo 3</button></div>
+      
+      <div class="form-group full"><label>Line 1: Govt of India (Hindi & English)</label><input id="s-lh-line1" value="भारत सरकार / GOVERNMENT OF INDIA"></div>
+      <div class="form-group full"><label>Line 2: Office Name (Hindi)</label><input id="s-lh-line2" value="आयुक्तकाकार्यालय, सीमा शुल्क (निवारक) आयुक्तालय, सीमा शुल्कएवंकेंद्रीय उत्पाद शुल्क, भुवनेश्वर"></div>
+      <div class="form-group full"><label>Line 3: Office Name (English)</label><input id="s-lh-line3" value="OFFICE OF THE COMMISSIONER, CUSTOMS (PREVENTIVE) COMMISSIONERATE&#10;CUSTOMS & CENTRAL EXCISE, BHUBANESWAR"></div>
+      <div class="form-group full"><label>Line 4: Address (Hindi)</label><input id="s-lh-line4" value="केंद्रीय राजस्व भवन (जीएसटी भवन), राजस्व विहार, भुवनेश्वर - 751007, ओड़िशा."></div>
+      <div class="form-group full"><label>Line 5: Address (English)</label><input id="s-lh-line5" value="C. R. BUILDING (GST BHAWAN), RAJASWA VIHAR, BHUBANESWAR – 751007, ODISHA"></div>
+      <div class="form-group full"><label>Line 6: Contact Info</label><input id="s-lh-line6" value="Phone No: 0674-2589112, 2589239            Email Id: cusbbsr1@gmail.com"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✍️ Note Preparer (You)</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Name</label><input id="s-prep-name" value="SAIKAT MONDAL"></div>
+      <div class="form-group"><label>Designation</label><input id="s-prep-desg" value="EXECUTIVE ASSISTANT"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🖊️ Order Signatories</div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:14px;">Order-এ কে sign করবেন তা এখানে যোগ করুন। Active signatory-র radio button সিলেক্ট করুন।</p>
+    <div class="sig-list" id="sig-list"></div>
+    <div class="btn-group">
+      <button class="btn btn-outline btn-sm" onclick="openSigModal()">+ নতুন Signatory যোগ করুন</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔑 Gemini API Keys (Auto-Rotation)</div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:14px;">একাধিক API Key যোগ করুন। একটির কোটা শেষ হলে নিজে থেকেই পরেরটি ব্যবহার হবে।</p>
+    <div class="form-grid" style="margin-bottom:14px;">
+      <div class="form-group">
+        <label>Select Gemini Model</label>
+        <select id="s-ai-model">
+          <optgroup label="Gemini 3 Series (Preview)">
+            <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview (Flagship/Best)</option>
+            <option value="gemini-3-flash-preview">gemini-3-flash-preview (Fast/Reasoning)</option>
+            <option value="gemini-3.1-flash-lite-preview">gemini-3.1-flash-lite-preview (Cost-effective)</option>
+          </optgroup>
+          <optgroup label="Gemini 2.5 Series (Stable)">
+            <option value="gemini-2.5-pro">gemini-2.5-pro (Stable/Enterprise)</option>
+            <option value="gemini-2.5-flash">gemini-2.5-flash (Stable/Fast)</option>
+            <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (Stable/Cost-effective)</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+    <div class="sig-list" id="api-keys-list"></div>
+    <div class="btn-group">
+      <button class="btn btn-outline btn-sm" onclick="addApiKeyField()">+ আরও একটি API Key যোগ করুন</button>
+    </div>
+  </div>
+
+  <div class="card" style="border-color: var(--blue);">
+    <div class="card-title">☁️ Google Cloud Sync</div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:14px;">Sync all your settings, signatures, and letterheads to the cloud to access them anywhere.</p>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Sync PIN / Identifier Code</label>
+        <input id="s-cloud-pin" type="text" placeholder="e.g. MyOffice123" title="Enter a unique phrase so you can retrieve your settings on any other computer">
+      </div>
+    </div>
+    <div class="btn-group">
+      <button id="btn-cloud-sync" class="btn btn-primary" onclick="syncToCloud()">☁️ Sync Settings to Cloud</button>
+      <button id="btn-cloud-restore" class="btn btn-gold" onclick="restoreFromCloud()">⬇️ Restore from Cloud</button>
+    </div>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn btn-gold" onclick="saveSettings()">💾 Settings সেভ করুন</button>
+  </div>
+</div>
+
+<!-- ===== RAG TAB ===== -->
+<div class="tab-content" id="tab-rag">
+  <div class="card">
+    <div class="card-title">📄 GPF Manual আপলোড</div>
+    <div id="rag-status" style="margin-bottom:16px;"></div>
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('pdf-input').click()">
+      <div class="icon">📁</div>
+      <div style="font-size:15px;font-weight:500;">GPF (CS) Rules 1960 PDF ফাইল আপলোড করুন</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">Click করুন বা drag & drop করুন</div>
+    </div>
+    <input type="file" id="pdf-input" accept=".pdf" style="display:none" onchange="handlePdfUpload(event)">
+    <div class="progress-bar" id="pdf-progress" style="display:none;"><div class="fill" id="pdf-progress-fill" style="width:0%"></div></div>
+    <div id="pdf-log" style="margin-top:12px;font-size:13px;color:var(--text-dim);"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📊 Stored Manual Info</div>
+    <div id="chunk-info" style="font-size:13px;color:var(--text-dim);">কোনো manual আপলোড করা হয়নি।</div>
+    <div class="btn-group">
+      <button class="btn btn-danger btn-sm" onclick="clearManual()">🗑️ Manual মুছে ফেলুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CASE TAB ===== -->
+<div class="tab-content" id="tab-case">
+  <div class="split">
+    <!-- Left: Form -->
+    <div>
+      <div class="card" style="border-color: var(--blue);">
+        <div class="card-title">🤖 AI Assistant (Auto-Fill)</div>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:10px;">Paste the full application details here (or type your instructions) and the AI will auto-fill the form and find the rule.</p>
+        <div class="form-group full">
+          <textarea id="ai-chat-input" rows="4" placeholder="Paste raw application text here..."></textarea>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary btn-sm" onclick="aiAutoFill()">✨ Auto-Fill Application</button>
+        </div>
+        <div id="ai-chat-result" style="margin-top:10px;font-size:13px;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👤 Applicant Details</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Prefix</label><select id="c-prefix"><option>Shri</option><option>Smt.</option><option>Ms.</option><option>Dr.</option></select></div>
+          <div class="form-group"><label>Full Name</label><input id="c-name" placeholder="Raghunath Behera"></div>
+          <div class="form-group"><label>Designation</label><input id="c-desg" placeholder="Superintendent"></div>
+          <div class="form-group full"><label>Posting / Office</label><input id="c-posting" placeholder="Customs (P) Commissionerate, Bhubaneswar"></div>
+          <div class="form-group"><label>Group</label><select id="c-group"><option>Group A</option><option selected>Group B</option><option>Group C</option></select></div>
+          <div class="form-group full"><label>Posted At (Unit)</label><input id="c-posted" placeholder="BPIA"></div>
+          <div class="form-group"><label>GPF Account No.</label><input id="c-gpf-ac" placeholder="BNR/CE/796"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Withdrawal Details</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Purpose</label>
+            <select id="c-purpose" onchange="onPurposeChange()">
+              <option value="betrothal_marriage">Betrothal/Marriage</option>
+              <option value="education">Education</option>
+              <option value="illness">Illness</option>
+              <option value="house_build">House Building/Purchase</option>
+              <option value="house_repair">House Repair/Renovation</option>
+              <option value="loan_repay">Repayment of Loan</option>
+              <option value="consumer">Consumer Durables</option>
+              <option value="superannuation">Superannuation Withdrawal (within 2yrs of retirement)</option>
+              <option value="other">Other (specify)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Applicable Rule</label>
+            <input id="c-rule" value="Rule 15(1)(A)(b)">
+          </div>
+          <div class="form-group">
+            <label>Amount Requested (₹)</label>
+            <input id="c-amount" type="number" oninput="calculate()">
+          </div>
+          <div class="form-group">
+            <label>Amount in Words (auto)</label>
+            <input id="c-amount-words" readonly>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary btn-sm" onclick="aiAnalyze()">🤖 AI Rule Analysis (Gemini)</button>
+        </div>
+        <div id="ai-result" style="margin-top:10px;font-size:13px;"></div>
+      </div>
+
+      <div class="card" id="ai-analysis-card" style="display:none; border-left: 4px solid var(--gold);">
+        <div class="card-title">🤖 AI Rule Analysis & Sanctioning Criteria</div>
+        <div id="ai-analysis-content" class="ai-analysis-content">
+          <!-- Dynamically filled by AI -->
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💰 Balance Details</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Closing Balance (Prev. Year) ₹</label><input id="c-closing" type="number" oninput="calculate()"></div>
+          <div class="form-group"><label>Balance Year</label><input id="c-bal-year"></div>
+          <div class="form-group"><label>Subscription Credit ₹</label><input id="c-sub" type="number" value="0" oninput="calculate()"></div>
+          <div class="form-group"><label>Credit Period</label><input id="c-sub-period" placeholder="03/25 to 02/26"></div>
+          <div class="form-group"><label>Refunds ₹ (0 = NIL)</label><input id="c-refund" type="number" value="0" oninput="calculate()"></div>
+          <div class="form-group"><label>Advances Drawn ₹ (0 = NIL)</label><input id="c-advance" type="number" value="0" oninput="calculate()"></div>
+          <div class="form-group"><label>Withdrawals ₹ (0 = NIL)</label><input id="c-withdraw" type="number" value="0" oninput="calculate()"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📁 Order Details</div>
+        <div class="form-grid">
+          <div class="form-group full"><label>File No.</label><input id="c-fileno" placeholder="II/(25)/92/2025-Admn-O/o Commr-Cus-Prev-Bhubaneswar"></div>
+          <div class="form-group"><label>Note Serial #</label><input id="c-note-no" type="number" value="62"></div>
+          <div class="form-group"><label>Note Sheet / Order Date</label><input id="c-sanction-date" type="date"></div>
+          <div class="form-group"><label>Acceptance Date (HOD/Commr.)</label><input id="c-accept-date" type="date" title="Date when HOD/Commissioner gave concurrence."></div>
+          <div class="form-group"><label>Restriction (Months)</label><input id="c-restrict" type="number" value="6"></div>
+          <div class="form-group"><label>Financial Year Override (optional)</label><input id="c-fin-year" placeholder="e.g. 2025-26 & 2026-27" title="Leave blank to auto-calculate. Use this if the restriction period spans two financial years."></div>
+          <div class="form-group">
+            <label>Order Signatory</label>
+            <select id="c-signatory"></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Preview -->
+    <div>
+      <div class="calc-panel" id="calc-panel">
+        <div class="calc-row"><span class="calc-label">Net Balance</span><span class="calc-value" id="cv-net">—</span></div>
+        <div class="calc-row"><span class="calc-label">Admissible Limit</span><span class="calc-value" id="cv-limit">—</span></div>
+        <div class="calc-row"><span class="calc-label">Amount Requested</span><span class="calc-value" id="cv-req">—</span></div>
+        <div class="calc-row"><span class="calc-label">Eligibility</span><span class="calc-value" id="cv-elig">—</span></div>
+      </div>
+
+      <div class="preview-tabs">
+        <button class="prev-tab-btn active" data-prev="note" onclick="switchPreview('note')">📝 Note Sheet</button>
+        <button class="prev-tab-btn" data-prev="order" onclick="switchPreview('order')">📄 Form 4A Order</button>
+      </div>
+      <div class="preview-box" id="preview-box">ফর্ম পূরণ করলে এখানে preview দেখা যাবে।</div>
+
+      <div class="btn-group" style="justify-content:center;">
+        <button class="btn btn-gold" onclick="downloadNote()">📥 Note Sheet (.docx)</button>
+        <button class="btn btn-success" onclick="downloadOrder()">📥 Order (.docx)</button>
+        <button class="btn btn-primary" onclick="downloadBoth()">📥 Both (.docx)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Signatory Modal -->
+<div class="modal-overlay" id="sig-modal">
+  <div class="modal">
+    <h3 id="sig-modal-title">নতুন Signatory যোগ করুন</h3>
+    <div class="form-grid" style="grid-template-columns:1fr;">
+      <div class="form-group"><label>Name</label><input id="m-sig-name" placeholder="Subhendra Pattanaik"></div>
+      <div class="form-group"><label>Designation</label><input id="m-sig-desg" placeholder="Superintendent(Admin/DDO)"></div>
+      <div class="form-group"><label>Office</label><input id="m-sig-office" placeholder="Customs(Prev.) Commissionerate, Bhubaneswar"></div>
+    </div>
+    <input type="hidden" id="m-sig-id">
+    <div class="btn-group">
+      <button class="btn btn-gold" onclick="saveSig()">💾 Save</button>
+      <button class="btn btn-outline" onclick="closeSigModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script type="module" src="firebase-sync.js"></script>
+<script src="generate.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
